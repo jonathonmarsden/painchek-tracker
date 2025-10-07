@@ -1,0 +1,23 @@
+{
+  "folders": [
+    {
+      "path": "."
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/.git": true,
+      "**/.DS_Store": true,
+      "**/node_modules": true
+    },
+    "editor.formatOnSave": true,
+    "editor.defaultFormatter": "esbenp.prettier-vscode"
+  },
+  "extensions": {
+    "recommendations": [
+      "anthropic.claude-code",
+      "esbenp.prettier-vscode",
+      "dbaeumer.vscode-eslint"
+    ]
+  }
+}

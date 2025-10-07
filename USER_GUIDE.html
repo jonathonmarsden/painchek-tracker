@@ -1,0 +1,642 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>PainChek Tracker - User Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto",
+          "Oxygen", "Ubuntu", "Cantarell", sans-serif;
+      }
+      .content-section {
+        scroll-margin-top: 2rem;
+      }
+    </style>
+  </head>
+  <body class="bg-gradient-to-br from-slate-50 to-slate-100">
+    <div class="max-w-4xl mx-auto p-6 space-y-8">
+      <!-- Header -->
+      <div class="bg-white rounded-2xl shadow-lg p-8">
+        <h1 class="text-4xl font-bold text-slate-800 mb-2">PainChek Tracker</h1>
+        <p class="text-lg text-slate-600 mb-4">Complete User Guide</p>
+        <a
+          href="https://painchek-tracker.netlify.app"
+          target="_blank"
+          class="text-blue-600 hover:text-blue-700 font-medium"
+        >
+          Open App &rarr;
+        </a>
+      </div>
+
+      <!-- Important Disclaimer -->
+      <div
+        class="bg-red-50 border-l-4 border-red-500 rounded-r-2xl shadow-lg p-6"
+      >
+        <h2 class="text-xl font-bold text-red-800 mb-3">
+          Important Disclaimer
+        </h2>
+        <div class="text-sm text-red-700 space-y-2">
+          <p><strong>This app is for informational purposes only.</strong></p>
+          <ul class="list-disc list-inside space-y-1 ml-2">
+            <li>NOT financial, investment, tax, or legal advice</li>
+            <li>Prices delayed 15-20 minutes (not real-time)</li>
+            <li>Past performance does not equal future results</li>
+            <li>Stock investments carry risk - you can lose money</li>
+          </ul>
+          <p class="font-semibold pt-2">
+            Always consult a licensed financial advisor before investing.
+          </p>
+        </div>
+      </div>
+
+      <!-- Table of Contents -->
+      <div class="bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Contents</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+          <a href="#what-is-this" class="text-blue-600 hover:text-blue-700"
+            >What Is This?</a
+          >
+          <a href="#getting-started" class="text-blue-600 hover:text-blue-700"
+            >Getting Started</a
+          >
+          <a href="#features" class="text-blue-600 hover:text-blue-700"
+            >Features</a
+          >
+          <a href="#charts" class="text-blue-600 hover:text-blue-700"
+            >Understanding Charts</a
+          >
+          <a href="#privacy" class="text-blue-600 hover:text-blue-700"
+            >Privacy & Security</a
+          >
+          <a href="#troubleshooting" class="text-blue-600 hover:text-blue-700"
+            >Troubleshooting</a
+          >
+          <a href="#faq" class="text-blue-600 hover:text-blue-700">FAQ</a>
+          <a href="#tips" class="text-blue-600 hover:text-blue-700"
+            >Tips for Success</a
+          >
+        </div>
+      </div>
+
+      <!-- What Is This? -->
+      <div
+        id="what-is-this"
+        class="content-section bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">What Is This?</h2>
+        <p class="text-slate-600 mb-4">
+          PainChek Tracker is a <strong>privacy-first web app</strong> for
+          tracking your PCK (PainChek Ltd - ASX:PCK) stock portfolio. It runs
+          entirely in your browser - no servers, no accounts, no data sharing.
+        </p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+          <div class="bg-green-50 rounded-lg p-4">
+            <h3 class="font-semibold text-green-800 mb-2">What it does:</h3>
+            <ul class="text-sm text-green-700 space-y-1">
+              <li>&bull; Tracks your purchases (tranches)</li>
+              <li>&bull; Calculates gains/losses automatically</li>
+              <li>&bull; Shows live prices (15-20 min delay)</li>
+              <li>&bull; Displays ASX announcements</li>
+              <li>&bull; Provides portfolio charts</li>
+            </ul>
+          </div>
+          <div class="bg-red-50 rounded-lg p-4">
+            <h3 class="font-semibold text-red-800 mb-2">
+              What it does NOT do:
+            </h3>
+            <ul class="text-sm text-red-700 space-y-1">
+              <li>&bull; Tell you when to buy/sell</li>
+              <li>&bull; Predict future prices</li>
+              <li>&bull; Provide investment advice</li>
+              <li>&bull; Share your data with anyone</li>
+              <li>&bull; Require registration/login</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <!-- Getting Started -->
+      <div
+        id="getting-started"
+        class="content-section bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Getting Started</h2>
+
+        <div class="space-y-4">
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-800 mb-2">
+              Step 1: Open the App
+            </h3>
+            <p class="text-sm text-blue-700">
+              Visit:
+              <a
+                href="https://painchek-tracker.netlify.app"
+                target="_blank"
+                class="underline"
+                >painchek-tracker.netlify.app</a
+              >
+            </p>
+          </div>
+
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-800 mb-2">
+              Step 2: Add Your First Tranche
+            </h3>
+            <ol
+              class="text-sm text-blue-700 space-y-1 list-decimal list-inside"
+            >
+              <li>Click "Add Tranche" button</li>
+              <li>Enter purchase date (required)</li>
+              <li>Enter number of shares (required)</li>
+              <li>Enter purchase price (or leave blank for auto-lookup)</li>
+              <li>Click "Add Tranche"</li>
+            </ol>
+          </div>
+
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h3 class="font-semibold text-blue-800 mb-2">
+              Step 3: Add to Home Screen (Mobile)
+            </h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+              <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">iPhone/iPad (Safari):</p>
+                <ol class="list-decimal list-inside space-y-1">
+                  <li>Tap Share button (up arrow)</li>
+                  <li>Tap "Add to Home Screen"</li>
+                  <li>Tap "Add"</li>
+                </ol>
+              </div>
+              <div class="text-sm text-blue-700">
+                <p class="font-semibold mb-1">Android (Chrome):</p>
+                <ol class="list-decimal list-inside space-y-1">
+                  <li>Tap menu (three dots)</li>
+                  <li>Tap "Add to Home screen"</li>
+                  <li>Tap "Add"</li>
+                </ol>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Features -->
+      <div
+        id="features"
+        class="content-section bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Key Features</h2>
+
+        <div class="space-y-4">
+          <!-- Tranches -->
+          <div class="border-l-4 border-blue-500 pl-4">
+            <h3 class="font-semibold text-slate-800 mb-2">
+              What is a "Tranche"?
+            </h3>
+            <p class="text-sm text-slate-600 mb-2">
+              A tranche is a single purchase batch. If you bought PCK shares on
+              different dates or prices, track each separately.
+            </p>
+            <div class="bg-slate-50 rounded p-3 text-sm">
+              <p class="font-mono mb-1">
+                Sept 15: 1,000 shares @ $0.235 &rarr; Tranche 1
+              </p>
+              <p class="font-mono">
+                Oct 1: 500 shares @ $0.242 &rarr; Tranche 2
+              </p>
+            </div>
+            <p class="text-xs text-slate-500 mt-2">
+              <strong>Why?</strong> See which purchases were profitable and
+              track your average cost basis.
+            </p>
+          </div>
+
+          <!-- Quick Stats -->
+          <div class="border-l-4 border-purple-500 pl-4">
+            <h3 class="font-semibold text-slate-800 mb-2">Quick Stats Panel</h3>
+            <div class="grid grid-cols-2 gap-2 text-sm">
+              <div><strong>Total Shares:</strong> Combined holdings</div>
+              <div><strong>Avg Cost Basis:</strong> Average price paid</div>
+              <div>
+                <strong>Break-Even Price:</strong> Price to reach profitability
+              </div>
+              <div><strong>Days Held:</strong> Since first purchase</div>
+            </div>
+          </div>
+
+          <!-- Price Alerts -->
+          <div class="border-l-4 border-yellow-500 pl-4">
+            <h3 class="font-semibold text-slate-800 mb-2">Price Alerts</h3>
+            <p class="text-sm text-slate-600">
+              Set high/low price targets. Get notified when you next open the
+              app (not real-time push notifications).
+            </p>
+          </div>
+
+          <!-- CSV Export -->
+          <div class="border-l-4 border-green-500 pl-4">
+            <h3 class="font-semibold text-slate-800 mb-2">CSV Export</h3>
+            <p class="text-sm text-slate-600">
+              Download your portfolio data for backup or tax reporting. Includes
+              all tranches with gains/losses.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Explained -->
+      <div
+        id="charts"
+        class="content-section bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">
+          Understanding Charts
+        </h2>
+
+        <div class="space-y-6">
+          <!-- Portfolio Performance -->
+          <div>
+            <h3 class="font-semibold text-slate-800 mb-3">
+              Portfolio Performance Chart
+            </h3>
+            <div
+              class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-3"
+            >
+              <p class="text-sm text-slate-700 mb-2">
+                <strong>What it shows:</strong> Portfolio value (blue) vs.
+                invested amount (grey dashed)
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mt-3 text-xs">
+                <div class="bg-white rounded p-2">
+                  <p class="font-semibold text-green-700">Making Money</p>
+                  <p class="text-slate-600">Blue above grey = profit</p>
+                </div>
+                <div class="bg-white rounded p-2">
+                  <p class="font-semibold text-red-700">Losing Money</p>
+                  <p class="text-slate-600">Blue below grey = loss</p>
+                </div>
+                <div class="bg-white rounded p-2">
+                  <p class="font-semibold text-slate-700">Break Even</p>
+                  <p class="text-slate-600">Lines touch = no gain/loss</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500">
+              <strong>Why it matters:</strong> See if your investment strategy
+              is working over time.
+            </p>
+          </div>
+
+          <!-- Price Chart -->
+          <div>
+            <h3 class="font-semibold text-slate-800 mb-3">
+              Price Chart (1 Year)
+            </h3>
+            <div
+              class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-4 mb-3"
+            >
+              <p class="text-sm text-slate-700 mb-2">
+                <strong>What it shows:</strong> PCK stock price over last 12
+                months
+              </p>
+              <ul class="text-xs space-y-1">
+                <li>&bull; Upward slope = Bull market (rising prices)</li>
+                <li>&bull; Downward slope = Bear market (falling prices)</li>
+                <li>&bull; Flat = Consolidation (sideways movement)</li>
+              </ul>
+            </div>
+            <p class="text-xs text-slate-500">
+              <strong>Why it matters:</strong> Spot trends and potential
+              entry/exit points.
+            </p>
+          </div>
+
+          <!-- Volume Chart -->
+          <div>
+            <h3 class="font-semibold text-slate-800 mb-3">Volume Chart</h3>
+            <div
+              class="bg-gradient-to-r from-teal-50 to-cyan-50 rounded-lg p-4 mb-3"
+            >
+              <p class="text-sm text-slate-700 mb-2">
+                <strong>What it shows:</strong> Number of shares traded each day
+              </p>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-2 mt-3 text-xs">
+                <div class="bg-white rounded p-2">
+                  <p class="font-semibold">High Volume + Price Up</p>
+                  <p class="text-slate-600">Strong buying (bullish)</p>
+                </div>
+                <div class="bg-white rounded p-2">
+                  <p class="font-semibold">High Volume + Price Down</p>
+                  <p class="text-slate-600">Panic selling (bearish)</p>
+                </div>
+              </div>
+            </div>
+            <p class="text-xs text-slate-500">
+              <strong>Pro tip:</strong> Volume spikes often precede ASX
+              announcements. Check "Recent Announcements" when you see unusual
+              activity.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Privacy & Security -->
+      <div
+        id="privacy"
+        class="content-section bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">
+          Privacy & Security
+        </h2>
+
+        <div class="bg-green-50 rounded-lg p-4 mb-4">
+          <h3 class="font-semibold text-green-800 mb-2">
+            100% Client-Side Storage
+          </h3>
+          <p class="text-sm text-green-700">
+            All portfolio data stays on YOUR device using browser localStorage.
+            Nothing is sent to servers, cloud, or databases.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-2 text-sm">
+              What's Stored Locally:
+            </h4>
+            <ul class="text-xs text-slate-600 space-y-1">
+              <li>&bull; Your tranches (dates, shares, prices)</li>
+              <li>&bull; Your price alerts</li>
+              <li>&bull; App preferences</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-semibold text-slate-800 mb-2 text-sm">
+              What's Transmitted:
+            </h4>
+            <ul class="text-xs text-slate-600 space-y-1">
+              <li>&bull; Stock symbol "PCK.AX" (for prices)</li>
+              <li>&bull; Company code "PCK" (for news)</li>
+              <li>&bull; <strong>NO personal data</strong></li>
+            </ul>
+          </div>
+        </div>
+
+        <div
+          class="bg-yellow-50 border-l-4 border-yellow-500 rounded-r p-3 mt-4"
+        >
+          <p class="text-xs text-yellow-800">
+            <strong>Important:</strong> If you clear browser data, your
+            portfolio is deleted. Export to CSV regularly as backup!
+          </p>
+        </div>
+      </div>
+
+      <!-- Troubleshooting -->
+      <div
+        id="troubleshooting"
+        class="content-section bg-white rounded-2xl shadow-lg p-6"
+      >
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Troubleshooting</h2>
+
+        <div class="space-y-3">
+          <details class="bg-slate-50 rounded-lg p-4">
+            <summary class="font-semibold text-slate-800 cursor-pointer">
+              Unable to load stock data
+            </summary>
+            <div class="mt-2 text-sm text-slate-600">
+              <p class="mb-2">
+                <strong>Causes:</strong> Yahoo Finance API down, network issue,
+                or CORS proxy offline
+              </p>
+              <p>
+                <strong>Fix:</strong> Click "Try Again" button, wait a few
+                minutes, or hard refresh (Ctrl+Shift+R)
+              </p>
+            </div>
+          </details>
+
+          <details class="bg-slate-50 rounded-lg p-4">
+            <summary class="font-semibold text-slate-800 cursor-pointer">
+              Charts not showing
+            </summary>
+            <div class="mt-2 text-sm text-slate-600">
+              <p class="mb-2">
+                <strong>Causes:</strong> Chart.js failed to load or browser
+                compatibility
+              </p>
+              <p>
+                <strong>Fix:</strong> Hard refresh (Ctrl+Shift+R), update
+                browser, or try Chrome/Firefox
+              </p>
+            </div>
+          </details>
+
+          <details class="bg-slate-50 rounded-lg p-4">
+            <summary class="font-semibold text-slate-800 cursor-pointer">
+              Price alerts not working
+            </summary>
+            <div class="mt-2 text-sm text-slate-600">
+              <p>
+                <strong>This is not a bug!</strong> Alerts only check when you
+                open the app (not real-time push notifications). Check the app
+                daily if you have active alerts.
+              </p>
+            </div>
+          </details>
+
+          <details class="bg-slate-50 rounded-lg p-4">
+            <summary class="font-semibold text-slate-800 cursor-pointer">
+              Data lost after browser update
+            </summary>
+            <div class="mt-2 text-sm text-slate-600">
+              <p class="mb-2">
+                <strong>Cause:</strong> Browser update cleared localStorage
+                (rare)
+              </p>
+              <p>
+                <strong>Prevention:</strong> Export to CSV monthly and save to
+                cloud storage
+              </p>
+            </div>
+          </details>
+        </div>
+      </div>
+
+      <!-- FAQ -->
+      <div id="faq" class="content-section bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">FAQ</h2>
+
+        <div class="space-y-3">
+          <div class="border-b border-slate-200 pb-3">
+            <h4 class="font-semibold text-slate-800 mb-1">
+              Does data sync across devices?
+            </h4>
+            <p class="text-sm text-slate-600">
+              No. Each device has its own localStorage. Export CSV on one device
+              and manually re-enter on another.
+            </p>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3">
+            <h4 class="font-semibold text-slate-800 mb-1">
+              Why are prices delayed?
+            </h4>
+            <p class="text-sm text-slate-600">
+              ASX exchange rules require 15-20 minute delays for free data
+              feeds. Real-time data requires expensive subscriptions.
+            </p>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3">
+            <h4 class="font-semibold text-slate-800 mb-1">
+              Can I track other stocks?
+            </h4>
+            <p class="text-sm text-slate-600">
+              No, this app is specifically built for PCK. You'd need to modify
+              the source code.
+            </p>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3">
+            <h4 class="font-semibold text-slate-800 mb-1">
+              Can I use this for tax purposes?
+            </h4>
+            <p class="text-sm text-slate-600">
+              The CSV export is accurate (dates, shares, prices, gains/losses)
+              but always double-check and consult your accountant.
+            </p>
+          </div>
+
+          <div class="border-b border-slate-200 pb-3">
+            <h4 class="font-semibold text-slate-800 mb-1">
+              Is there a mobile app?
+            </h4>
+            <p class="text-sm text-slate-600">
+              No native apps, but you can add the web app to your home screen on
+              iOS/Android. It behaves like a native app!
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tips for Success -->
+      <div id="tips" class="content-section bg-white rounded-2xl shadow-lg p-6">
+        <h2 class="text-2xl font-bold text-slate-800 mb-4">Tips for Success</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="bg-blue-50 rounded-lg p-4">
+            <h4 class="font-semibold text-blue-800 mb-2">Export Regularly</h4>
+            <p class="text-sm text-blue-700">
+              Export to CSV monthly and save to cloud storage as backup.
+            </p>
+          </div>
+
+          <div class="bg-green-50 rounded-lg p-4">
+            <h4 class="font-semibold text-green-800 mb-2">
+              Track Each Purchase
+            </h4>
+            <p class="text-sm text-green-700">
+              Separate tranches show which buys were smart and which weren't.
+            </p>
+          </div>
+
+          <div class="bg-purple-50 rounded-lg p-4">
+            <h4 class="font-semibold text-purple-800 mb-2">
+              Watch Volume + News
+            </h4>
+            <p class="text-sm text-purple-700">
+              Big volume spike? Check Recent Announcements for explanations.
+            </p>
+          </div>
+
+          <div class="bg-orange-50 rounded-lg p-4">
+            <h4 class="font-semibold text-orange-800 mb-2">
+              Use Avg Cost Basis
+            </h4>
+            <p class="text-sm text-orange-700">
+              If current price is near your average, consider buying more
+              (dollar-cost averaging).
+            </p>
+          </div>
+        </div>
+
+        <div class="bg-amber-50 border-l-4 border-amber-500 rounded-r p-4 mt-4">
+          <h4 class="font-semibold text-amber-800 mb-2">
+            Good Investing Practices
+          </h4>
+          <ul class="text-sm text-amber-700 space-y-1">
+            <li>&bull; Never invest money you can't afford to lose</li>
+            <li>
+              &bull; Diversify your portfolio (don't put all eggs in one basket)
+            </li>
+            <li>&bull; Understand what you're investing in</li>
+            <li>&bull; Keep emotions out of decision-making</li>
+            <li>&bull; Consult professionals when unsure</li>
+          </ul>
+        </div>
+      </div>
+
+      <!-- Final Disclaimer -->
+      <div
+        class="bg-gradient-to-r from-red-50 to-orange-50 rounded-2xl shadow-lg p-6 border-l-4 border-red-500"
+      >
+        <h3 class="font-bold text-red-800 mb-3">Final Reminder</h3>
+        <div class="text-sm text-red-700 space-y-2">
+          <p>
+            <strong
+              >This app shows you data. YOU make the decisions. PROFESSIONALS
+              provide advice.</strong
+            >
+          </p>
+          <p>By using this app, you acknowledge:</p>
+          <ul class="list-disc list-inside space-y-1 ml-2">
+            <li>You are solely responsible for your investment decisions</li>
+            <li>You will verify all data with official sources</li>
+            <li>You will consult licensed professionals before investing</li>
+            <li>You understand stock market risks</li>
+          </ul>
+          <p class="pt-2">
+            <strong
+              >Invest wisely. Verify everything. Consult experts. Take
+              responsibility.</strong
+            >
+          </p>
+        </div>
+      </div>
+
+      <!-- Footer -->
+      <div class="text-center text-sm text-slate-500 pb-8">
+        <p class="mb-2">
+          <a
+            href="https://painchek-tracker.netlify.app"
+            target="_blank"
+            class="text-blue-600 hover:text-blue-700 font-medium"
+          >
+            Open App
+          </a>
+          &bull;
+          <a
+            href="CODE_REVIEW.html"
+            target="_blank"
+            class="text-blue-600 hover:text-blue-700"
+            >Security Review</a
+          >
+          &bull;
+          <a
+            href="DOCUMENTATION_INDEX.html"
+            target="_blank"
+            class="text-blue-600 hover:text-blue-700"
+            >All Docs</a
+          >
+        </p>
+        <p class="text-xs">
+          Last updated: October 7, 2025 &bull; For informational purposes only
+          &bull; Not financial advice
+        </p>
+      </div>
+    </div>
+  </body>
+</html>

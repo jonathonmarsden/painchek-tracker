@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:www.asx.com.au)",
+      "WebSearch"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

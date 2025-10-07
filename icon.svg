@@ -1,0 +1,24 @@
+<svg width="512" height="512" viewBox="0 0 512 512" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background gradient - PainChek teal/turquoise -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#14b8a6;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#0d9488;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded square background -->
+  <rect width="512" height="512" rx="115" fill="url(#bgGradient)"/>
+
+  <!-- PCK Text -->
+  <text x="256" y="320" font-family="Arial, sans-serif" font-size="180" font-weight="bold" fill="white" text-anchor="middle">PCK</text>
+
+  <!-- Small upward trend line -->
+  <polyline points="80,400 150,370 220,385 290,350 360,340 430,310"
+            stroke="white"
+            stroke-width="12"
+            fill="none"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            opacity="0.6"/>
+</svg>

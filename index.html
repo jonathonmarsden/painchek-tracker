@@ -1,0 +1,1445 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="PainChek Tracker">
+    <meta name="description" content="Private stock tracking app for PainChek (ASX:PCK) - 100% local storage, no data sharing">
+
+    <!-- App Icons -->
+    <link rel="icon" type="image/svg+xml" href="icon.svg">
+    <link rel="apple-touch-icon" href="icon.svg">
+    <meta name="theme-color" content="#14b8a6">
+
+    <title>PainChek Tracker - ASX:PCK Portfolio Manager</title>
+    
+    <!-- React and dependencies from CDN -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Chart.js for charts - much more reliable -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+    
+    <!-- Lucide icons -->
+    <script src="https://unpkg.com/lucide@0.294.0"></script>
+    
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+        }
+    </style>
+</head>
+<body>
+    <div id="root"></div>
+    
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // Error Boundary Component
+        class ErrorBoundary extends React.Component {
+          constructor(props) {
+            super(props);
+            this.state = { hasError: false, error: null };
+          }
+
+          static getDerivedStateFromError(error) {
+            return { hasError: true, error };
+          }
+
+          componentDidCatch(error, errorInfo) {
+            console.error('Error caught by boundary:', error, errorInfo);
+          }
+
+          render() {
+            if (this.state.hasError) {
+              return (
+                <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6 flex items-center justify-center">
+                  <div className="max-w-2xl bg-white rounded-2xl shadow-lg p-8 text-center">
+                    <svg className="w-16 h-16 text-red-500 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <h1 className="text-2xl font-bold text-slate-800 mb-2">Something went wrong</h1>
+                    <p className="text-slate-600 mb-6">
+                      The app encountered an unexpected error. Please try refreshing the page.
+                    </p>
+                    <button
+                      onClick={() => window.location.reload()}
+                      className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                    >
+                      Refresh Page
+                    </button>
+                    {this.state.error && (
+                      <details className="mt-6 text-left">
+                        <summary className="text-sm text-slate-500 cursor-pointer hover:text-slate-700">
+                          Technical Details
+                        </summary>
+                        <pre className="mt-2 p-4 bg-slate-100 rounded text-xs text-slate-800 overflow-auto">
+                          {this.state.error.toString()}
+                        </pre>
+                      </details>
+                    )}
+                  </div>
+                </div>
+              );
+            }
+
+            return this.props.children;
+          }
+        }
+
+        // Icon components (simplified)
+        const TrendingUp = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+            </svg>
+        );
+
+        const TrendingDown = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 17h8m0 0V9m0 8l-8-8-4 4-6-6" />
+            </svg>
+        );
+
+        const Plus = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+            </svg>
+        );
+
+        const Trash2 = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+            </svg>
+        );
+
+        const AlertCircle = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+        );
+
+        const RefreshCw = ({ className }) => (
+            <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+            </svg>
+        );
+
+        const PainChekTracker = () => {
+          const [currentPrice, setCurrentPrice] = useState(null);
+          const [priceChange, setPriceChange] = useState(null);
+          const [tranches, setTranches] = useState([]);
+          const [chartData, setChartData] = useState([]);
+          const [news, setNews] = useState([]);
+          const [loading, setLoading] = useState(true);
+          const [lastUpdate, setLastUpdate] = useState(null);
+          const [showAddTranche, setShowAddTranche] = useState(false);
+          const [dataSource, setDataSource] = useState('live');
+          const [priceAlerts, setPriceAlerts] = useState({ high: '', low: '' });
+          const [showAlertSettings, setShowAlertSettings] = useState(false);
+
+          const [newTranche, setNewTranche] = useState({
+            date: '',
+            shares: '',
+            price: ''
+          });
+
+          // Debouncing refs
+          const fetchTimeoutRef = useRef(null);
+          const lastFetchRef = useRef(0);
+          const isFetchingRef = useRef(false);
+          const FETCH_COOLDOWN = 2000; // 2 seconds minimum between requests
+
+          useEffect(() => {
+            const savedTranches = localStorage.getItem('pck-tranches');
+            if (savedTranches) {
+              setTranches(JSON.parse(savedTranches));
+            }
+
+            const savedAlerts = localStorage.getItem('pck-price-alerts');
+            if (savedAlerts) {
+              setPriceAlerts(JSON.parse(savedAlerts));
+            }
+          }, []);
+
+          useEffect(() => {
+            if (tranches.length > 0) {
+              localStorage.setItem('pck-tranches', JSON.stringify(tranches));
+            }
+          }, [tranches]);
+
+          useEffect(() => {
+            fetchStockData();
+            fetchNews();
+
+            const interval = setInterval(() => {
+              fetchStockData();
+              fetchNews();
+            }, 300000);
+
+            return () => {
+              clearInterval(interval);
+              if (fetchTimeoutRef.current) {
+                clearTimeout(fetchTimeoutRef.current);
+              }
+            };
+          }, []);
+
+          const fetchStockData = async () => {
+            // Throttling check
+            const now = Date.now();
+            if (isFetchingRef.current) {
+              console.log('Fetch already in progress, skipping...');
+              return;
+            }
+
+            const timeSinceLastFetch = now - lastFetchRef.current;
+            if (timeSinceLastFetch < FETCH_COOLDOWN) {
+              console.log(`Throttling: waiting ${FETCH_COOLDOWN - timeSinceLastFetch}ms before next fetch`);
+
+              // Schedule for later
+              if (fetchTimeoutRef.current) {
+                clearTimeout(fetchTimeoutRef.current);
+              }
+              fetchTimeoutRef.current = setTimeout(() => {
+                fetchStockData();
+              }, FETCH_COOLDOWN - timeSinceLastFetch);
+              return;
+            }
+
+            try {
+              isFetchingRef.current = true;
+              lastFetchRef.current = now;
+              setLoading(true);
+
+              const symbol = 'PCK.AX';
+              // Use CORS proxy to bypass CORS restrictions
+              const corsProxy = 'https://corsproxy.io/?';
+              const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
+              const response = await fetch(
+                corsProxy + encodeURIComponent(apiUrl),
+                {
+                  method: 'GET',
+                  headers: {
+                    'Accept': 'application/json',
+                  }
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+              }
+
+              const data = await response.json();
+
+              if (data.chart && data.chart.result && data.chart.result[0]) {
+                const result = data.chart.result[0];
+                const quote = result.meta;
+                const timestamps = result.timestamp || [];
+                const prices = result.indicators.quote[0];
+
+                if (quote.regularMarketPrice) {
+                  setCurrentPrice(quote.regularMarketPrice);
+                  const prevClose = quote.chartPreviousClose || quote.previousClose;
+                  if (prevClose) {
+                    setPriceChange({
+                      value: quote.regularMarketPrice - prevClose,
+                      percent: ((quote.regularMarketPrice - prevClose) / prevClose * 100)
+                    });
+                  }
+                }
+
+                if (timestamps.length > 0) {
+                  const chartPoints = timestamps.map((time, index) => ({
+                    date: new Date(time * 1000).toLocaleDateString('en-AU', {
+                      month: 'short',
+                      day: 'numeric'
+                    }),
+                    timestamp: time * 1000, // Keep full timestamp for accurate date comparison
+                    price: prices.close[index],
+                    volume: prices.volume[index]
+                  })).filter(point => point.price !== null && point.price > 0);
+
+                  setChartData(chartPoints);
+                }
+
+                setLastUpdate(new Date());
+                setDataSource('live');
+              } else {
+                throw new Error('No valid data received from API');
+              }
+            } catch (error) {
+              console.error('Error fetching stock data:', error);
+            } finally {
+              setLoading(false);
+              isFetchingRef.current = false;
+            }
+          };
+
+          const fetchNews = async () => {
+            try {
+              // Fetch announcements from ASX
+              const corsProxy = 'https://corsproxy.io/?';
+              const asxUrl = 'https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=PCK&timeframe=D&period=M3';
+
+              const response = await fetch(
+                corsProxy + encodeURIComponent(asxUrl),
+                {
+                  method: 'GET',
+                  headers: {
+                    'Accept': 'text/html',
+                  }
+                }
+              );
+
+              if (!response.ok) {
+                throw new Error(`ASX API error: ${response.status}`);
+              }
+
+              const html = await response.text();
+              const parser = new DOMParser();
+              const doc = parser.parseFromString(html, 'text/html');
+
+              // Find all links that point to announcement PDFs
+              const links = doc.querySelectorAll('a[href*="displayAnnouncement"]');
+              const announcements = [];
+
+              links.forEach(link => {
+                const row = link.closest('tr');
+                if (!row) return;
+
+                const cells = row.querySelectorAll('td');
+                if (cells.length < 3) return;
+
+                // Extract data from table cells
+                const dateText = cells[0]?.textContent?.trim();
+                const title = link.textContent?.trim();
+                const href = link.getAttribute('href');
+
+                // Check for price sensitive indicator
+                const priceSensitiveImg = cells[1]?.querySelector('img[alt*="Price"]');
+                const isPriceSensitive = !!priceSensitiveImg;
+
+                if (title && dateText && href) {
+                  // Build full URL - the href uses displayAnnouncement.do
+                  let fullUrl = href;
+                  if (!href.startsWith('http')) {
+                    fullUrl = href.startsWith('/')
+                      ? `https://www.asx.com.au${href}`
+                      : `https://www.asx.com.au/asx/v2/statistics/${href}`;
+                  }
+
+                  announcements.push({
+                    date: dateText,
+                    title: title,
+                    source: isPriceSensitive ? 'ASX (Price Sensitive)' : 'ASX Announcement',
+                    url: fullUrl,
+                    isPriceSensitive
+                  });
+                }
+              });
+
+              if (announcements.length > 0) {
+                // Take the 8 most recent
+                setNews(announcements.slice(0, 8));
+                console.log('Fetched announcements:', announcements.slice(0, 8));
+              } else {
+                throw new Error('No announcements found');
+              }
+            } catch (error) {
+              console.error('Error fetching ASX announcements:', error);
+
+              // Fallback: Link to the company announcements page
+              setNews([
+                {
+                  date: '07/10/2025',
+                  title: 'Trading Halt',
+                  source: 'ASX (Price Sensitive)',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03006183',
+                  isPriceSensitive: true
+                },
+                {
+                  date: '02/10/2025',
+                  title: 'Notification of cessation of securities - PCK',
+                  source: 'ASX Announcement',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03004370',
+                  isPriceSensitive: false
+                },
+                {
+                  date: '30/09/2025',
+                  title: 'Appendix 3Y - Change of Director\'s Interest Notice',
+                  source: 'ASX Announcement',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03003598',
+                  isPriceSensitive: false
+                },
+                {
+                  date: '27/09/2025',
+                  title: 'Update - Notification of buy-back - PCK',
+                  source: 'ASX Announcement',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03002913',
+                  isPriceSensitive: false
+                }
+              ]);
+            }
+          };
+
+          const lookupHistoricalPrice = async (date) => {
+            try {
+              const targetDate = new Date(date);
+              const startTime = Math.floor(targetDate.getTime() / 1000) - 86400;
+              const endTime = Math.floor(targetDate.getTime() / 1000) + 86400;
+
+              // Use CORS proxy for historical data too
+              const corsProxy = 'https://corsproxy.io/?';
+              const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/PCK.AX?period1=${startTime}&period2=${endTime}&interval=1d`;
+              const response = await fetch(
+                corsProxy + encodeURIComponent(apiUrl),
+                {
+                  method: 'GET',
+                  headers: {
+                    'Accept': 'application/json',
+                  }
+                }
+              );
+              
+              if (!response.ok) {
+                throw new Error('Failed to fetch historical price');
+              }
+              
+              const data = await response.json();
+              
+              if (data.chart && data.chart.result && data.chart.result[0]) {
+                const prices = data.chart.result[0].indicators.quote[0];
+                const closePrice = prices.close.find(p => p !== null && p > 0);
+                if (closePrice) {
+                  return closePrice;
+                }
+              }
+              
+              return null;
+            } catch (error) {
+              console.error('Error looking up historical price:', error);
+              return null;
+            }
+          };
+
+          const checkLocalStorageUsage = () => {
+            try {
+              let total = 0;
+              for (let key in localStorage) {
+                if (localStorage.hasOwnProperty(key)) {
+                  total += localStorage[key].length + key.length;
+                }
+              }
+              const totalKB = (total / 1024).toFixed(2);
+              const limitKB = 5120; // 5MB in KB
+              const percentUsed = (total / (limitKB * 1024)) * 100;
+
+              if (percentUsed > 80) {
+                console.warn(`localStorage usage: ${totalKB}KB (${percentUsed.toFixed(1)}% of 5MB limit)`);
+                return { warning: true, percentUsed: percentUsed.toFixed(1), totalKB };
+              }
+              return { warning: false, percentUsed: percentUsed.toFixed(1), totalKB };
+            } catch (e) {
+              console.error('Error checking localStorage usage:', e);
+              return { warning: false, percentUsed: 0, totalKB: 0 };
+            }
+          };
+
+          const handleAddTranche = async () => {
+            if (!newTranche.date || !newTranche.shares) {
+              alert('Please enter at least a date and number of shares');
+              return;
+            }
+
+            // Validate date is not in the future
+            const purchaseDate = new Date(newTranche.date);
+            const today = new Date();
+            today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
+
+            if (purchaseDate > today) {
+              alert('Purchase date cannot be in the future. Please enter a valid past date.');
+              return;
+            }
+
+            // Validate shares is positive
+            const shares = parseFloat(newTranche.shares);
+            if (shares <= 0 || isNaN(shares)) {
+              alert('Please enter a valid positive number of shares.');
+              return;
+            }
+
+            // Check localStorage usage before adding
+            const storageCheck = checkLocalStorageUsage();
+            if (storageCheck.warning) {
+              if (!confirm(`Warning: You're using ${storageCheck.percentUsed}% of your browser's storage limit (${storageCheck.totalKB}KB of 5MB). Consider exporting your data to CSV as a backup. Continue adding this tranche?`)) {
+                return;
+              }
+            }
+
+            let price = parseFloat(newTranche.price);
+            
+            if (!price) {
+              const historicalPrice = await lookupHistoricalPrice(newTranche.date);
+              if (historicalPrice) {
+                price = historicalPrice;
+              } else {
+                alert('Could not find historical price for this date. Please enter the purchase price manually.');
+                return;
+              }
+            }
+            
+            const tranche = {
+              id: Date.now(),
+              date: newTranche.date,
+              shares: shares,
+              purchasePrice: price
+            };
+            
+            setTranches([...tranches, tranche]);
+            setNewTranche({ date: '', shares: '', price: '' });
+            setShowAddTranche(false);
+          };
+
+          const handleDeleteTranche = (id) => {
+            const updatedTranches = tranches.filter(t => t.id !== id);
+            setTranches(updatedTranches);
+
+            if (updatedTranches.length === 0) {
+              localStorage.removeItem('pck-tranches');
+            } else {
+              localStorage.setItem('pck-tranches', JSON.stringify(updatedTranches));
+            }
+          };
+
+          const calculateTrancheValue = (tranche) => {
+            if (!currentPrice) return 0;
+            return tranche.shares * currentPrice;
+          };
+
+          const calculateTrancheGain = (tranche) => {
+            if (!currentPrice) return { value: 0, percent: 0 };
+            const currentValue = tranche.shares * currentPrice;
+            const purchaseValue = tranche.shares * tranche.purchasePrice;
+            const gainValue = currentValue - purchaseValue;
+            const gainPercent = (gainValue / purchaseValue) * 100;
+            return { value: gainValue, percent: gainPercent };
+          };
+
+          const calculateTotalPortfolio = () => {
+            if (!currentPrice) return { value: 0, invested: 0, gain: 0, gainPercent: 0, totalShares: 0, averageCostBasis: 0, daysHeld: 0, daysSinceLastPurchase: 0 };
+
+            const totalShares = tranches.reduce((sum, t) => sum + t.shares, 0);
+            const currentValue = totalShares * currentPrice;
+            const invested = tranches.reduce((sum, t) => sum + (t.shares * t.purchasePrice), 0);
+            const gain = currentValue - invested;
+            const gainPercent = invested > 0 ? (gain / invested) * 100 : 0;
+            const averageCostBasis = totalShares > 0 ? invested / totalShares : 0;
+
+            // Calculate days held (from first purchase)
+            const oldestTranche = tranches.length > 0 ? tranches.reduce((oldest, t) => {
+              const date = new Date(t.date);
+              return !oldest || date < oldest ? date : oldest;
+            }, null) : null;
+            const daysHeld = oldestTranche ? Math.floor((new Date() - oldestTranche) / (1000 * 60 * 60 * 24)) : 0;
+
+            // Days since last purchase
+            const newestTranche = tranches.length > 0 ? tranches.reduce((newest, t) => {
+              const date = new Date(t.date);
+              return !newest || date > newest ? date : newest;
+            }, null) : null;
+            const daysSinceLastPurchase = newestTranche ? Math.floor((new Date() - newestTranche) / (1000 * 60 * 60 * 24)) : 0;
+
+            return {
+              value: currentValue,
+              invested,
+              gain,
+              gainPercent,
+              totalShares,
+              averageCostBasis,
+              daysHeld,
+              daysSinceLastPurchase
+            };
+          };
+
+          const formatCurrency = (value) => {
+            return new Intl.NumberFormat('en-AU', {
+              style: 'currency',
+              currency: 'AUD'
+            }).format(value);
+          };
+
+          const formatNumber = (value) => {
+            return new Intl.NumberFormat('en-AU').format(value);
+          };
+
+          const handleSaveAlerts = () => {
+            if (priceAlerts.high || priceAlerts.low) {
+              localStorage.setItem('pck-price-alerts', JSON.stringify(priceAlerts));
+              alert('Price alerts saved! You can check them each time you visit.');
+            }
+            setShowAlertSettings(false);
+          };
+
+          const handleExportCSV = () => {
+            if (tranches.length === 0) {
+              alert('No tranches to export');
+              return;
+            }
+
+            const headers = ['Purchase Date', 'Shares', 'Purchase Price', 'Current Price', 'Current Value', 'Gain/Loss', 'Gain/Loss %'];
+            const rows = tranches.map(tranche => {
+              const gain = calculateTrancheGain(tranche);
+              const value = calculateTrancheValue(tranche);
+              return [
+                tranche.date,
+                tranche.shares,
+                tranche.purchasePrice.toFixed(3),
+                currentPrice ? currentPrice.toFixed(3) : 'N/A',
+                value.toFixed(2),
+                gain.value.toFixed(2),
+                gain.percent.toFixed(2)
+              ];
+            });
+
+            const csvContent = [
+              headers.join(','),
+              ...rows.map(row => row.join(','))
+            ].join('\n');
+
+            const blob = new Blob([csvContent], { type: 'text/csv' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `painchek-portfolio-${new Date().toISOString().split('T')[0]}.csv`;
+            a.click();
+            window.URL.revokeObjectURL(url);
+          };
+
+          const checkPriceAlerts = () => {
+            if (!currentPrice || (!priceAlerts.high && !priceAlerts.low)) return null;
+
+            const highAlert = priceAlerts.high && parseFloat(priceAlerts.high) > 0 && currentPrice >= parseFloat(priceAlerts.high);
+            const lowAlert = priceAlerts.low && parseFloat(priceAlerts.low) > 0 && currentPrice <= parseFloat(priceAlerts.low);
+
+            if (highAlert || lowAlert) {
+              return { high: highAlert, low: lowAlert };
+            }
+            return null;
+          };
+
+          const activeAlerts = checkPriceAlerts();
+          const calculatePortfolioHistory = () => {
+            if (tranches.length === 0 || chartData.length === 0) return [];
+
+            // Get earliest tranche date
+            const earliestDate = tranches.reduce((earliest, t) => {
+              const date = new Date(t.date);
+              return date < earliest ? date : earliest;
+            }, new Date(tranches[0].date));
+
+            // Filter chart data to only show from earliest purchase
+            const relevantData = chartData.filter(point => {
+              if (!point.timestamp) return false;
+              const pointDate = new Date(point.timestamp);
+              return pointDate >= earliestDate;
+            });
+
+            // Calculate portfolio value at each point
+            return relevantData.map(point => {
+              const pointDate = new Date(point.timestamp);
+
+              const totalShares = tranches.reduce((sum, t) => {
+                const trancheDate = new Date(t.date);
+                // Only count tranches purchased before or on this date
+                return pointDate >= trancheDate ? sum + t.shares : sum;
+              }, 0);
+
+              const portfolioValue = totalShares * point.price;
+
+              // Calculate total invested up to this point
+              const invested = tranches.reduce((sum, t) => {
+                const trancheDate = new Date(t.date);
+                return pointDate >= trancheDate ? sum + (t.shares * t.purchasePrice) : sum;
+              }, 0);
+
+              return {
+                date: point.date,
+                value: portfolioValue,
+                invested: invested,
+                gain: portfolioValue - invested
+              };
+            });
+          };
+
+          const portfolioHistory = calculatePortfolioHistory();
+          const portfolio = calculateTotalPortfolio();
+
+          // Render charts with Chart.js
+          useEffect(() => {
+            if (!window.Chart) return;
+
+            let portfolioChart, priceChartInstance, volumeChartInstance;
+
+            // Portfolio Chart
+            if (portfolioHistory.length > 0) {
+              const ctx = document.getElementById('portfolioChart');
+              if (ctx) {
+                if (ctx.chart) ctx.chart.destroy();
+                portfolioChart = new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                    labels: portfolioHistory.map(p => p.date),
+                    datasets: [
+                      {
+                        label: 'Portfolio Value',
+                        data: portfolioHistory.map(p => p.value),
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.1
+                      },
+                      {
+                        label: 'Total Invested',
+                        data: portfolioHistory.map(p => p.invested),
+                        borderColor: '#94a3b8',
+                        backgroundColor: 'rgba(148, 163, 184, 0.1)',
+                        borderWidth: 2,
+                        borderDash: [5, 5],
+                        tension: 0.1
+                      }
+                    ]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      tooltip: {
+                        callbacks: {
+                          label: (context) => `${context.dataset.label}: ${formatCurrency(context.parsed.y)}`
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        ticks: {
+                          callback: (value) => formatCurrency(value)
+                        }
+                      }
+                    }
+                  }
+                });
+                ctx.chart = portfolioChart;
+              }
+            }
+
+            // Price Chart
+            if (chartData.length > 0) {
+              const ctx = document.getElementById('priceChart');
+              if (ctx) {
+                if (ctx.chart) ctx.chart.destroy();
+                priceChartInstance = new Chart(ctx, {
+                  type: 'line',
+                  data: {
+                    labels: chartData.map(d => d.date),
+                    datasets: [{
+                      label: 'Price',
+                      data: chartData.map(d => d.price),
+                      borderColor: '#3b82f6',
+                      backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                      borderWidth: 2,
+                      tension: 0.1,
+                      fill: true
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      tooltip: {
+                        callbacks: {
+                          label: (context) => `Price: ${formatCurrency(context.parsed.y)}`
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        ticks: {
+                          callback: (value) => formatCurrency(value)
+                        }
+                      }
+                    }
+                  }
+                });
+                ctx.chart = priceChartInstance;
+              }
+
+              // Volume Chart
+              const vctx = document.getElementById('volumeChart');
+              if (vctx) {
+                if (vctx.chart) vctx.chart.destroy();
+                volumeChartInstance = new Chart(vctx, {
+                  type: 'line',
+                  data: {
+                    labels: chartData.map(d => d.date),
+                    datasets: [{
+                      label: 'Volume',
+                      data: chartData.map(d => d.volume),
+                      borderColor: '#14b8a6',
+                      backgroundColor: 'rgba(20, 184, 166, 0.2)',
+                      borderWidth: 2,
+                      tension: 0.1,
+                      fill: true
+                    }]
+                  },
+                  options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                      tooltip: {
+                        callbacks: {
+                          label: (context) => `Volume: ${new Intl.NumberFormat().format(context.parsed.y)}`
+                        }
+                      }
+                    },
+                    scales: {
+                      y: {
+                        ticks: {
+                          callback: (value) => {
+                            if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+                            if (value >= 1000) return `${(value / 1000).toFixed(0)}K`;
+                            return value;
+                          }
+                        }
+                      }
+                    }
+                  }
+                });
+                vctx.chart = volumeChartInstance;
+              }
+            }
+
+            // Cleanup function to prevent memory leaks
+            return () => {
+              if (portfolioChart) portfolioChart.destroy();
+              if (priceChartInstance) priceChartInstance.destroy();
+              if (volumeChartInstance) volumeChartInstance.destroy();
+            };
+          }, [portfolioHistory, chartData]);
+
+          return (
+            <div className="min-h-screen bg-gradient-to-br from-slate-50 to-slate-100 p-4 md:p-6">
+              <div className="max-w-6xl mx-auto space-y-6">
+
+                {/* Header */}
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <div>
+                      <h1 className="text-3xl font-bold text-slate-800">PainChek Tracker</h1>
+                      <p className="text-slate-500 text-sm mt-1">ASX:PCK • Prices delayed 15-20 mins</p>
+                    </div>
+                    <button
+                      onClick={fetchStockData}
+                      className="p-3 rounded-full bg-blue-50 hover:bg-blue-100 transition-colors"
+                      title="Refresh data"
+                      disabled={loading}
+                    >
+                      <RefreshCw className={`w-5 h-5 text-blue-600 ${loading ? 'animate-spin' : ''}`} />
+                    </button>
+                  </div>
+
+                  {/* Price Alerts Banner */}
+                  {activeAlerts && (
+                    <div className="mb-4 p-3 bg-yellow-50 border-l-4 border-yellow-500 rounded-r-lg">
+                      <div className="flex items-center gap-2">
+                        <AlertCircle className="w-5 h-5 text-yellow-600" />
+                        <div className="text-sm text-yellow-800">
+                          {activeAlerts.high && <span className="font-semibold">Price reached your HIGH alert of {formatCurrency(parseFloat(priceAlerts.high))}! </span>}
+                          {activeAlerts.low && <span className="font-semibold">Price reached your LOW alert of {formatCurrency(parseFloat(priceAlerts.low))}! </span>}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  
+                  {loading && !currentPrice ? (
+                    <div className="text-center py-8">
+                      <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+                      <p className="text-slate-500 mt-4">Loading stock data...</p>
+                    </div>
+                  ) : !currentPrice ? (
+                    <div className="text-center py-8">
+                      <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+                      <p className="text-slate-700 font-semibold mb-2">Unable to Load Stock Data</p>
+                      <p className="text-slate-500 text-sm mb-4">
+                        Could not connect to the stock price API. This may be due to network restrictions or API limitations.
+                      </p>
+                      <button
+                        onClick={fetchStockData}
+                        className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        Try Again
+                      </button>
+                      <p className="text-xs text-slate-400 mt-4">
+                        You can still add tranches and track your holdings. Percentage calculations will work once data loads.
+                      </p>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div className="space-y-2">
+                          <p className="text-sm text-slate-500 font-medium">Current Price</p>
+                          <p className="text-4xl font-bold text-slate-800">
+                            {formatCurrency(currentPrice || 0)}
+                          </p>
+                          {priceChange && (
+                            <div className={`flex items-center gap-2 ${priceChange.value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                              {priceChange.value >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                              <span className="font-semibold">
+                                {formatCurrency(Math.abs(priceChange.value))} ({priceChange.percent.toFixed(2)}%)
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm text-slate-500 font-medium">Portfolio Value</p>
+                          <p className="text-4xl font-bold text-slate-800">
+                            {formatCurrency(portfolio.value)}
+                          </p>
+                          <p className="text-sm text-slate-500">
+                            Invested: {formatCurrency(portfolio.invested)}
+                          </p>
+                        </div>
+                        
+                        <div className="space-y-2">
+                          <p className="text-sm text-slate-500 font-medium">Total Gain/Loss</p>
+                          <p className={`text-4xl font-bold ${portfolio.gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {formatCurrency(portfolio.gain)}
+                          </p>
+                          <div className={`flex items-center gap-2 ${portfolio.gain >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                            {portfolio.gain >= 0 ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
+                            <span className="font-semibold">
+                              {portfolio.gainPercent.toFixed(2)}%
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {lastUpdate && (
+                        <p className="text-xs text-slate-400 mt-4">
+                          Last updated: {lastUpdate.toLocaleTimeString()} • Source: Yahoo Finance API
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+
+                {/* Quick Stats Panel */}
+                {portfolio && portfolio.totalShares > 0 && (
+                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-6 border border-blue-100">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                      </svg>
+                      Quick Stats
+                    </h2>
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <p className="text-xs text-slate-500 mb-1">Total Shares</p>
+                        <p className="text-2xl font-bold text-slate-900">{formatNumber(portfolio.totalShares)}</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <p className="text-xs text-slate-500 mb-1">Avg Cost Basis</p>
+                        <p className="text-2xl font-bold text-blue-600">{formatCurrency(portfolio.averageCostBasis)}</p>
+                        {currentPrice && (
+                          <p className={`text-xs mt-1 ${currentPrice >= portfolio.averageCostBasis ? 'text-green-600' : 'text-red-600'}`}>
+                            {currentPrice >= portfolio.averageCostBasis ? '↑' : '↓'} {Math.abs(((currentPrice - portfolio.averageCostBasis) / portfolio.averageCostBasis) * 100).toFixed(1)}% vs current
+                          </p>
+                        )}
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <p className="text-xs text-slate-500 mb-1">Break-Even Price</p>
+                        <p className="text-2xl font-bold text-purple-600">{formatCurrency(portfolio.averageCostBasis)}</p>
+                        <p className="text-xs text-slate-500 mt-1">Need to reach</p>
+                      </div>
+                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                        <p className="text-xs text-slate-500 mb-1">Days Held</p>
+                        <p className="text-2xl font-bold text-teal-600">{portfolio.daysHeld}</p>
+                        <p className="text-xs text-slate-500 mt-1">Since first buy</p>
+                      </div>
+                    </div>
+                    {portfolio.daysSinceLastPurchase > 0 && (
+                      <div className="mt-4 p-3 bg-amber-50 rounded-lg border border-amber-200">
+                        <p className="text-sm text-amber-800">
+                          <span className="font-semibold">{portfolio.daysSinceLastPurchase} days</span> since your last purchase.
+                          {portfolio.daysSinceLastPurchase > 30 && ' Consider dollar-cost averaging if you believe in the long-term potential.'}
+                        </p>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Portfolio Performance Chart */}
+                {portfolioHistory.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Your Portfolio Performance</h2>
+                    <div className="relative" style={{height: '300px'}}>
+                      <canvas id="portfolioChart"></canvas>
+                    </div>
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                      <p className="text-xs text-slate-700">
+                        <span className="font-semibold">Why this matters:</span> This chart shows whether your investment strategy is working.
+                        If the blue line (portfolio value) is above the grey dashed line (what you invested), you're in profit.
+                        The gap between them shows your actual gains or losses over time. Compare this with your Average Cost Basis
+                        in the Quick Stats panel above to decide if current price is a good entry point for buying more shares.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Price & Volume Charts */}
+                {chartData.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Price & Volume History (1 Year)</h2>
+
+                    {/* Price Chart */}
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-slate-600 mb-2">Price</h3>
+                      <div className="relative" style={{height: '250px'}}>
+                        <canvas id="priceChart"></canvas>
+                      </div>
+                    </div>
+
+                    {/* Volume Chart */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-600 mb-2">Volume</h3>
+                      <div className="relative" style={{height: '150px'}}>
+                        <canvas id="volumeChart"></canvas>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 p-3 bg-teal-50 rounded-lg border-l-4 border-teal-500">
+                      <p className="text-xs text-slate-700">
+                        <span className="font-semibold">Why this matters:</span> Volume spikes often signal important events before they happen.
+                        High volume + price jump = strong momentum (good for holders). High volume + price drop = potential panic selling or bad news.
+                        Watch for unusual volume spikes - they often precede ASX announcements or major company news.
+                        Cross-reference volume patterns with the Recent Announcements section below to understand what's driving market activity.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Tranches */}
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <div className="flex items-center justify-between mb-6 flex-wrap gap-2">
+                    <h2 className="text-xl font-bold text-slate-800">Your Tranches</h2>
+                    <div className="flex gap-2">
+                      {tranches.length > 0 && (
+                        <button
+                          onClick={handleExportCSV}
+                          className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                          title="Export to CSV"
+                        >
+                          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Export CSV
+                        </button>
+                      )}
+                      <button
+                        onClick={() => setShowAddTranche(!showAddTranche)}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                      >
+                        <Plus className="w-5 h-5" />
+                        Add Tranche
+                      </button>
+                    </div>
+                  </div>
+
+                  {showAddTranche && (
+                    <div className="mb-6 p-4 bg-blue-50 rounded-lg space-y-4">
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Purchase Date *
+                          </label>
+                          <input
+                            type="date"
+                            value={newTranche.date}
+                            max={new Date().toISOString().split('T')[0]}
+                            onChange={(e) => setNewTranche({ ...newTranche, date: e.target.value })}
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Number of Shares *
+                          </label>
+                          <input
+                            type="number"
+                            min="0.01"
+                            step="1"
+                            value={newTranche.shares}
+                            onChange={(e) => setNewTranche({ ...newTranche, shares: e.target.value })}
+                            placeholder="e.g. 1000"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Purchase Price (optional)
+                          </label>
+                          <input
+                            type="number"
+                            min="0"
+                            step="0.001"
+                            value={newTranche.price}
+                            onChange={(e) => setNewTranche({ ...newTranche, price: e.target.value })}
+                            placeholder="Auto-lookup if blank"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                      </div>
+                      <div className="flex gap-2">
+                        <button
+                          onClick={handleAddTranche}
+                          className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Add Tranche
+                        </button>
+                        <button
+                          onClick={() => setShowAddTranche(false)}
+                          className="px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors"
+                        >
+                          Cancel
+                        </button>
+                      </div>
+                      <p className="text-xs text-slate-500">
+                        <AlertCircle className="w-3 h-3 inline mr-1" />
+                        If purchase price is left blank, we'll look up the actual historical price from Yahoo Finance
+                      </p>
+                    </div>
+                  )}
+
+                  {tranches.length === 0 ? (
+                    <div className="text-center py-12 text-slate-500">
+                      <p className="mb-2">No tranches added yet</p>
+                      <p className="text-sm">Click "Add Tranche" to start tracking your holdings</p>
+                    </div>
+                  ) : (
+                    <div className="space-y-4">
+                      {tranches.map((tranche) => {
+                        const gain = calculateTrancheGain(tranche);
+                        const value = calculateTrancheValue(tranche);
+                        
+                        return (
+                          <div key={tranche.id} className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
+                            <div className="flex items-start justify-between">
+                              <div className="flex-1 grid grid-cols-2 md:grid-cols-5 gap-4">
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Purchase Date</p>
+                                  <p className="text-sm font-semibold text-slate-800">
+                                    {new Date(tranche.date).toLocaleDateString()}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Shares</p>
+                                  <p className="text-sm font-semibold text-slate-800">
+                                    {formatNumber(tranche.shares)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Purchase Price</p>
+                                  <p className="text-sm font-semibold text-slate-800">
+                                    {formatCurrency(tranche.purchasePrice)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Current Value</p>
+                                  <p className="text-sm font-semibold text-slate-800">
+                                    {formatCurrency(value)}
+                                  </p>
+                                </div>
+                                <div>
+                                  <p className="text-xs text-slate-500 font-medium">Gain/Loss</p>
+                                  <p className={`text-sm font-semibold ${gain.value >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                                    {formatCurrency(gain.value)}
+                                    <span className="text-xs ml-1">
+                                      ({gain.percent.toFixed(2)}%)
+                                    </span>
+                                  </p>
+                                </div>
+                              </div>
+                              <button
+                                onClick={() => handleDeleteTranche(tranche.id)}
+                                className="ml-4 p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+                                title="Delete tranche"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </div>
+
+                {/* Price Alerts & Quick Links */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {/* Price Alerts */}
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <div className="flex items-center justify-between mb-4">
+                      <h2 className="text-xl font-bold text-slate-800">Price Alerts</h2>
+                      <button
+                        onClick={() => setShowAlertSettings(!showAlertSettings)}
+                        className="text-sm text-blue-600 hover:text-blue-700 font-medium"
+                      >
+                        {showAlertSettings ? 'Cancel' : 'Set Alerts'}
+                      </button>
+                    </div>
+
+                    {showAlertSettings ? (
+                      <div className="space-y-4">
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            High Price Alert (AUD)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={priceAlerts.high}
+                            onChange={(e) => setPriceAlerts({ ...priceAlerts, high: e.target.value })}
+                            placeholder="e.g. 0.50"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-slate-700 mb-1">
+                            Low Price Alert (AUD)
+                          </label>
+                          <input
+                            type="number"
+                            step="0.01"
+                            value={priceAlerts.low}
+                            onChange={(e) => setPriceAlerts({ ...priceAlerts, low: e.target.value })}
+                            placeholder="e.g. 0.20"
+                            className="w-full px-3 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                          />
+                        </div>
+                        <button
+                          onClick={handleSaveAlerts}
+                          className="w-full px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                        >
+                          Save Alerts
+                        </button>
+                        <p className="text-xs text-slate-500">
+                          Alerts are checked when you visit the app. A banner will appear if price has reached your target.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-2">
+                        {priceAlerts.high && (
+                          <div className="flex items-center justify-between p-3 bg-green-50 rounded-lg">
+                            <span className="text-sm text-slate-700">High Alert</span>
+                            <span className="font-semibold text-green-700">{formatCurrency(parseFloat(priceAlerts.high))}</span>
+                          </div>
+                        )}
+                        {priceAlerts.low && (
+                          <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                            <span className="text-sm text-slate-700">Low Alert</span>
+                            <span className="font-semibold text-red-700">{formatCurrency(parseFloat(priceAlerts.low))}</span>
+                          </div>
+                        )}
+                        {!priceAlerts.high && !priceAlerts.low && (
+                          <p className="text-sm text-slate-500">No alerts set. Click "Set Alerts" to add price targets.</p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* External Links */}
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Track PainChek</h2>
+                    <div className="space-y-2">
+                      <a
+                        href="https://www.asx.com.au/markets/company/PCK"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-slate-800">ASX Announcements</span>
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                      <a
+                        href="https://hotcopper.com.au/asx/pck/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-slate-800">HotCopper Forum</span>
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                      <a
+                        href="https://www.painchek.com/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="flex items-center justify-between p-3 bg-slate-50 rounded-lg hover:bg-slate-100 transition-colors"
+                      >
+                        <span className="text-sm font-medium text-slate-800">Company Website</span>
+                        <svg className="w-4 h-4 text-slate-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                        </svg>
+                      </a>
+                    </div>
+                  </div>
+                </div>
+
+                {/* News & Announcements */}
+                <div className="bg-white rounded-2xl shadow-lg p-6">
+                  <h2 className="text-xl font-bold text-slate-800 mb-4">Recent Announcements</h2>
+                  <div className="space-y-3">
+                    {news.map((item, index) => {
+                      // Determine styling based on announcement type
+                      const isHalt = item.title?.toLowerCase().includes('halt');
+                      const isPriceSensitive = item.isPriceSensitive || isHalt;
+
+                      const borderColor = isPriceSensitive ? 'border-red-500' : 'border-blue-500';
+                      const bgColor = isPriceSensitive ? 'bg-red-50' : 'bg-blue-50';
+                      const hoverBg = isPriceSensitive ? 'hover:bg-red-100' : 'hover:bg-blue-100';
+
+                      return (
+                        <a
+                          key={index}
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className={`block p-4 border-l-4 ${borderColor} ${bgColor} rounded-r-lg ${hoverBg} transition-colors cursor-pointer`}
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2">
+                                {isPriceSensitive && (
+                                  <svg className="w-4 h-4 text-red-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                  </svg>
+                                )}
+                                <p className="font-semibold text-slate-800 hover:text-blue-600">{item.title}</p>
+                              </div>
+                              <p className="text-xs text-slate-500 mt-1">
+                                {item.source} • {item.date}
+                              </p>
+                            </div>
+                            <svg className="w-5 h-5 text-slate-400 flex-shrink-0 ml-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                            </svg>
+                          </div>
+                        </a>
+                      );
+                    })}
+                  </div>
+                  <p className="text-xs text-slate-400 mt-4">
+                    <AlertCircle className="w-3 h-3 inline mr-1" />
+                    Auto-updated from ASX • Price-sensitive announcements highlighted in red
+                  </p>
+                </div>
+
+                {/* Footer */}
+                <div className="bg-white rounded-2xl shadow-lg p-6 text-sm">
+                  <div className="space-y-3">
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">📱 How This App Works</h3>
+                      <p className="text-slate-600">
+                        This is a <strong>standalone web app</strong> that runs entirely in your browser. Add it to your phone's home screen
+                        for quick access - no app store needed. The app provides real-time price tracking, portfolio performance charts,
+                        trading volume analysis, and key investment metrics to help you make informed decisions about PCK stock.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">🔒 Your Privacy is Protected</h3>
+                      <p className="text-slate-600">
+                        <strong>100% Private:</strong> All your portfolio data (tranches, shares, purchase prices, alerts) is stored
+                        locally on your device using browser localStorage. Nothing is sent to any server, cloud, or database.
+                        Your investment information never leaves your device and is never shared with anyone - not even us.
+                        You can export your data to CSV anytime for your records.
+                      </p>
+                    </div>
+
+                    <div>
+                      <h3 className="font-semibold text-slate-800 mb-2">📊 What You Can Track</h3>
+                      <p className="text-slate-600 mb-2">
+                        <strong>• Live Stock Data:</strong> Real-time PCK price updates from Yahoo Finance (delayed 15-20 min, per exchange rules)
+                      </p>
+                      <p className="text-slate-600 mb-2">
+                        <strong>• Portfolio Performance:</strong> Track your total holdings, gains/losses, and see your portfolio value over time
+                      </p>
+                      <p className="text-slate-600 mb-2">
+                        <strong>• Key Metrics:</strong> Average cost basis, break-even price, days held, and days since last purchase
+                      </p>
+                      <p className="text-slate-600 mb-2">
+                        <strong>• Price & Volume Charts:</strong> 1-year price history and trading volume to spot trends and unusual activity
+                      </p>
+                      <p className="text-slate-600 mb-2">
+                        <strong>• Price Alerts:</strong> Set high/low price targets to monitor buying/selling opportunities
+                      </p>
+                      <p className="text-slate-600">
+                        <strong>• ASX News:</strong> Quick links to official announcements and investor resources
+                      </p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Documentation Link */}
+                <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-6 border border-blue-100">
+                  <a
+                    href="USER_GUIDE.html"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center justify-between hover:opacity-80 transition-opacity group"
+                  >
+                    <div className="flex items-center gap-3">
+                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                      </svg>
+                      <div>
+                        <p className="font-semibold text-slate-800 group-hover:text-blue-600">User Guide</p>
+                        <p className="text-sm text-slate-600">Complete manual for beginners</p>
+                      </div>
+                    </div>
+                    <svg className="w-5 h-5 text-slate-400 group-hover:text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                    </svg>
+                  </a>
+                </div>
+
+                <div className="text-center text-xs text-slate-400 pb-4 space-y-1">
+                  <p><strong>Disclaimer:</strong> Stock prices are delayed by 15-20 minutes • For informational purposes only</p>
+                  <p>This app does not provide financial advice • Always consult with a financial advisor for investment decisions</p>
+                </div>
+              </div>
+            </div>
+          );
+        };
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(
+          <ErrorBoundary>
+            <PainChekTracker />
+          </ErrorBoundary>
+        );
+    </script>
+</body>
+</html>

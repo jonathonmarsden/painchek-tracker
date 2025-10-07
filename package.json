@@ -1,0 +1,22 @@
+{
+  "name": "painchek-tracker",
+  "version": "1.0.0",
+  "description": "Private stock tracking app for PainChek (ASX:PCK) holdings",
+  "main": "index.html",
+  "scripts": {
+    "deploy": "netlify deploy --prod",
+    "deploy:draft": "netlify deploy"
+  },
+  "keywords": [
+    "stock-tracker",
+    "portfolio",
+    "painchek",
+    "asx"
+  ],
+  "author": "Jonathon Marsden",
+  "license": "UNLICENSED",
+  "private": true,
+  "devDependencies": {
+    "netlify-cli": "^17.0.0"
+  }
+}
