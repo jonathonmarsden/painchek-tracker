@@ -944,19 +944,14 @@
 
                 {/* Quick Stats Panel */}
                 {portfolio && portfolio.totalShares > 0 && (
-                  <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-2xl shadow-lg p-6 border border-blue-100">
-                    <h2 className="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
-                      <svg className="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                      </svg>
-                      Quick Stats
-                    </h2>
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Quick Stats</h2>
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <div className="bg-slate-50 rounded-lg p-4">
                         <p className="text-xs text-slate-500 mb-1">Total Shares</p>
                         <p className="text-2xl font-bold text-slate-900">{formatNumber(portfolio.totalShares)}</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <div className="bg-slate-50 rounded-lg p-4">
                         <p className="text-xs text-slate-500 mb-1">Avg Cost Basis</p>
                         <p className="text-2xl font-bold text-blue-600">{formatCurrency(portfolio.averageCostBasis)}</p>
                         {currentPrice && (
@@ -965,12 +960,12 @@
                           </p>
                         )}
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <div className="bg-slate-50 rounded-lg p-4">
                         <p className="text-xs text-slate-500 mb-1">Break-Even Price</p>
                         <p className="text-2xl font-bold text-purple-600">{formatCurrency(portfolio.averageCostBasis)}</p>
                         <p className="text-xs text-slate-500 mt-1">Need to reach</p>
                       </div>
-                      <div className="bg-white rounded-lg p-4 shadow-sm">
+                      <div className="bg-slate-50 rounded-lg p-4">
                         <p className="text-xs text-slate-500 mb-1">Days Held</p>
                         <p className="text-2xl font-bold text-teal-600">{portfolio.daysHeld}</p>
                         <p className="text-xs text-slate-500 mt-1">Since first buy</p>
@@ -984,56 +979,6 @@
                         </p>
                       </div>
                     )}
-                  </div>
-                )}
-
-                {/* Portfolio Performance Chart */}
-                {portfolioHistory.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-lg p-6">
-                    <h2 className="text-xl font-bold text-slate-800 mb-4">Your Portfolio Performance</h2>
-                    <div className="relative" style={{height: '300px'}}>
-                      <canvas id="portfolioChart"></canvas>
-                    </div>
-                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
-                      <p className="text-xs text-slate-700">
-                        <span className="font-semibold">Why this matters:</span> This chart shows whether your investment strategy is working.
-                        If the blue line (portfolio value) is above the grey dashed line (what you invested), you're in profit.
-                        The gap between them shows your actual gains or losses over time. Compare this with your Average Cost Basis
-                        in the Quick Stats panel above to decide if current price is a good entry point for buying more shares.
-                      </p>
-                    </div>
-                  </div>
-                )}
-
-                {/* Price & Volume Charts */}
-                {chartData.length > 0 && (
-                  <div className="bg-white rounded-2xl shadow-lg p-6">
-                    <h2 className="text-xl font-bold text-slate-800 mb-4">Price & Volume History (1 Year)</h2>
-
-                    {/* Price Chart */}
-                    <div className="mb-6">
-                      <h3 className="text-sm font-semibold text-slate-600 mb-2">Price</h3>
-                      <div className="relative" style={{height: '250px'}}>
-                        <canvas id="priceChart"></canvas>
-                      </div>
-                    </div>
-
-                    {/* Volume Chart */}
-                    <div>
-                      <h3 className="text-sm font-semibold text-slate-600 mb-2">Volume</h3>
-                      <div className="relative" style={{height: '150px'}}>
-                        <canvas id="volumeChart"></canvas>
-                      </div>
-                    </div>
-
-                    <div className="mt-4 p-3 bg-teal-50 rounded-lg border-l-4 border-teal-500">
-                      <p className="text-xs text-slate-700">
-                        <span className="font-semibold">Why this matters:</span> Volume spikes often signal important events before they happen.
-                        High volume + price jump = strong momentum (good for holders). High volume + price drop = potential panic selling or bad news.
-                        Watch for unusual volume spikes - they often precede ASX announcements or major company news.
-                        Cross-reference volume patterns with the Recent Announcements section below to understand what's driving market activity.
-                      </p>
-                    </div>
                   </div>
                 )}
 
@@ -1139,7 +1084,7 @@
                       {tranches.map((tranche) => {
                         const gain = calculateTrancheGain(tranche);
                         const value = calculateTrancheValue(tranche);
-                        
+
                         return (
                           <div key={tranche.id} className="p-4 border border-slate-200 rounded-lg hover:border-blue-300 transition-colors">
                             <div className="flex items-start justify-between">
@@ -1192,6 +1137,56 @@
                     </div>
                   )}
                 </div>
+
+                {/* Portfolio Performance Chart */}
+                {portfolioHistory.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Your Portfolio Performance</h2>
+                    <div className="relative" style={{height: '300px'}}>
+                      <canvas id="portfolioChart"></canvas>
+                    </div>
+                    <div className="mt-3 p-3 bg-blue-50 rounded-lg border-l-4 border-blue-500">
+                      <p className="text-xs text-slate-700">
+                        <span className="font-semibold">Why this matters:</span> This chart shows whether your investment strategy is working.
+                        If the blue line (portfolio value) is above the grey dashed line (what you invested), you're in profit.
+                        The gap between them shows your actual gains or losses over time. Compare this with your Average Cost Basis
+                        in the Quick Stats panel above to decide if current price is a good entry point for buying more shares.
+                      </p>
+                    </div>
+                  </div>
+                )}
+
+                {/* Price & Volume Charts */}
+                {chartData.length > 0 && (
+                  <div className="bg-white rounded-2xl shadow-lg p-6">
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Price & Volume History (1 Year)</h2>
+
+                    {/* Price Chart */}
+                    <div className="mb-6">
+                      <h3 className="text-sm font-semibold text-slate-600 mb-2">Price</h3>
+                      <div className="relative" style={{height: '250px'}}>
+                        <canvas id="priceChart"></canvas>
+                      </div>
+                    </div>
+
+                    {/* Volume Chart */}
+                    <div>
+                      <h3 className="text-sm font-semibold text-slate-600 mb-2">Volume</h3>
+                      <div className="relative" style={{height: '150px'}}>
+                        <canvas id="volumeChart"></canvas>
+                      </div>
+                    </div>
+
+                    <div className="mt-4 p-3 bg-teal-50 rounded-lg border-l-4 border-teal-500">
+                      <p className="text-xs text-slate-700">
+                        <span className="font-semibold">Why this matters:</span> Volume spikes often signal important events before they happen.
+                        High volume + price jump = strong momentum (good for holders). High volume + price drop = potential panic selling or bad news.
+                        Watch for unusual volume spikes - they often precede ASX announcements or major company news.
+                        Cross-reference volume patterns with the Recent Announcements section below to understand what's driving market activity.
+                      </p>
+                    </div>
+                  </div>
+                )}
 
                 {/* Price Alerts & Quick Links */}
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
