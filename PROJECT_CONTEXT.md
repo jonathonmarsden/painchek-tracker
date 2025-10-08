@@ -264,11 +264,27 @@ git push
 - [ ] Listed on portfolio
 
 ### Recent Updates (Oct 8, 2025):
+
+**UI/UX Improvements:**
 - Harmonized Quick Stats styling (removed gradient)
 - Reorganized card layout (Tranches above Charts)
 - Changed chart timeframe from 1 year to 3 months
-- Fixed localStorage URL migration documentation
 - Removed annoying "days since purchase" banner
+- Fixed localStorage URL migration documentation
+
+**Security & Stability (MAJOR):**
+- ✅ Replaced CORS proxy with Netlify Functions (stock-proxy.js, asx-proxy.js)
+- ✅ Added comprehensive input validation (prevents corrupt localStorage)
+- ✅ Added retry logic with exponential backoff (1s, 2s, 4s)
+- ✅ No localStorage impact - existing user data safe
+
+**Known Issues (from code review):**
+- CRITICAL: Chart instances may cause memory leaks (needs ref-based cleanup)
+- CRITICAL: Missing useEffect dependencies (React Hooks violations)
+- IMPORTANT: Charts recreated instead of updated (performance)
+- IMPORTANT: Heavy calculations not memoized
+- IMPORTANT: Missing accessibility (ARIA labels, keyboard nav)
+- See full code review for details
 
 ### Deployment Checklist (Phase 1):
 1. [ ] Open project in VS Code
