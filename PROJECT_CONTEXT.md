@@ -33,18 +33,34 @@ A private stock portfolio tracker specifically for PainChek (ASX:PCK) shares. He
 
 ## 🔗 URLS & DEPLOYMENT
 
-### Planned URLs:
-- **Working App:** https://painchek.jonathonmarsden.com
-- **Fallback URL:** https://painchek-tracker.netlify.app
-- **Showcase Page:** https://jonathonmarsden.com/projects/painchek
+### Live URLs:
+- **Primary App:** https://painchek.jonathonmarsden.com (NEW - added Oct 7, 2025)
+- **Legacy URL:** https://painchek-tracker.netlify.app (ORIGINAL - still active)
+- **Showcase Page:** https://jonathonmarsden.com/projects/painchek (pending)
 - **GitHub Repo:** https://github.com/jonathonmarsden/painchek-tracker
+
+### ⚠️ IMPORTANT: localStorage Migration Issue
+**Problem:** Both URLs are live, but localStorage is domain-specific. Users who had data at the Netlify URL won't see it at the custom domain URL.
+
+**Impact:** Users reported missing tranches after visiting the new domain (Oct 8, 2025).
+
+**Root Cause:**
+- `painchek-tracker.netlify.app` localStorage ≠ `painchek.jonathonmarsden.com` localStorage
+- Data doesn't automatically transfer between domains
+- Users need to export from old URL and import to new URL
+
+**Solution Options:**
+1. Add migration helper banner in app
+2. Redirect old domain to new (users must export first)
+3. Document manual export/import process
+4. Keep both URLs active (users choose)
 
 ### Deployment:
 - **Platform:** Netlify
 - **Connected to:** GitHub (auto-deploy on push)
 - **Custom Domain:** painchek.jonathonmarsden.com (via Cloudflare DNS)
 - **HTTPS:** Automatic (Netlify SSL)
-- **Status:** Ready to deploy (Phase 1)
+- **Status:** ✅ Deployed (Oct 7, 2025)
 
 ---
 
