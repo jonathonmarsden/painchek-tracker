@@ -222,7 +222,7 @@
               const symbol = 'PCK.AX';
               // Use CORS proxy to bypass CORS restrictions
               const corsProxy = 'https://corsproxy.io/?';
-              const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=1y`;
+              const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=3mo`;
               const response = await fetch(
                 corsProxy + encodeURIComponent(apiUrl),
                 {
@@ -1151,7 +1151,7 @@
                 {/* Price & Volume Charts */}
                 {chartData.length > 0 && (
                   <div className="bg-white rounded-2xl shadow-lg p-6">
-                    <h2 className="text-xl font-bold text-slate-800 mb-4">Price & Volume History (1 Year)</h2>
+                    <h2 className="text-xl font-bold text-slate-800 mb-4">Price & Volume History (3 Months)</h2>
 
                     {/* Price Chart */}
                     <div className="mb-6">
