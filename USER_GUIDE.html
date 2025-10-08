@@ -462,6 +462,59 @@
               </p>
             </div>
           </details>
+
+          <details class="bg-amber-50 rounded-lg p-4 border-l-4 border-amber-500">
+            <summary class="font-semibold text-amber-800 cursor-pointer">
+              ⚠️ My tranches disappeared! (URL Migration Issue)
+            </summary>
+            <div class="mt-2 text-sm text-amber-800">
+              <p class="mb-3">
+                <strong>Did you switch between these URLs?</strong>
+              </p>
+              <ul class="list-disc list-inside space-y-1 mb-3">
+                <li>https://painchek-tracker.netlify.app (OLD)</li>
+                <li>https://painchek.jonathonmarsden.com (NEW)</li>
+              </ul>
+              <p class="mb-3">
+                <strong>Problem:</strong> Browser localStorage is domain-specific.
+                Your data is still safe at the OLD URL, but doesn't automatically
+                transfer to the NEW URL.
+              </p>
+              <p class="mb-3 font-semibold">
+                How to recover your data:
+              </p>
+              <ol class="list-decimal list-inside space-y-2 mb-3 ml-2">
+                <li>
+                  <strong>Open the OLD URL:</strong>
+                  <a href="https://painchek-tracker.netlify.app" target="_blank" class="underline text-blue-600">
+                    painchek-tracker.netlify.app
+                  </a>
+                </li>
+                <li>
+                  <strong>Export your data:</strong> Click "Export CSV" button
+                </li>
+                <li>
+                  <strong>Save the CSV file</strong> to your device/cloud
+                </li>
+                <li>
+                  <strong>Open the NEW URL:</strong>
+                  <a href="https://painchek.jonathonmarsden.com" target="_blank" class="underline text-blue-600">
+                    painchek.jonathonmarsden.com
+                  </a>
+                </li>
+                <li>
+                  <strong>Re-enter your tranches</strong> using the CSV as reference
+                </li>
+              </ol>
+              <div class="bg-amber-100 rounded p-2 mt-3">
+                <p class="text-xs">
+                  <strong>Going forward:</strong> Pick ONE URL and stick with it.
+                  Bookmark your preferred URL. Both work identically, but data
+                  doesn't sync between them.
+                </p>
+              </div>
+            </div>
+          </details>
         </div>
       </div>
 
