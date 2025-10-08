@@ -231,12 +231,13 @@ git push
 ## 💡 FUTURE ENHANCEMENTS
 
 **Ideas for v2:**
-- Add price chart visualization (Chart.js)
-- Add export to CSV feature
+- ✅ Add price chart visualization (Chart.js) - DONE (Oct 2025)
+- ✅ Add export to CSV feature - DONE (Oct 2025)
 - Add dividend tracking
 - Add support for multiple stocks (not just PCK)
 - Add currency conversion (AUD to other currencies)
 - Add dark mode toggle
+- Add import CSV feature (restore from export)
 
 **Technical Improvements:**
 - Add TypeScript for type safety
@@ -253,14 +254,21 @@ git push
 - [x] Project files created (index.html exists)
 - [x] Core functionality complete
 - [x] Tested locally
-- [ ] Git repo initialized
-- [ ] GitHub repo created (public)
-- [ ] Pushed to GitHub
-- [ ] Deployed to Netlify
-- [ ] Custom domain configured (painchek.jonathonmarsden.com)
-- [ ] Auto-deploy working
+- [x] Git repo initialized
+- [x] GitHub repo created (public)
+- [x] Pushed to GitHub
+- [x] Deployed to Netlify
+- [x] Custom domain configured (painchek.jonathonmarsden.com)
+- [x] Auto-deploy working
 - [ ] Showcase page created
 - [ ] Listed on portfolio
+
+### Recent Updates (Oct 8, 2025):
+- Harmonized Quick Stats styling (removed gradient)
+- Reorganized card layout (Tranches above Charts)
+- Changed chart timeframe from 1 year to 3 months
+- Fixed localStorage URL migration documentation
+- Removed annoying "days since purchase" banner
 
 ### Deployment Checklist (Phase 1):
 1. [ ] Open project in VS Code
