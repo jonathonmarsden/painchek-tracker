@@ -231,20 +231,61 @@
           }
 
           useEffect(() => {
-            const savedTranches = localStorage.getItem('pck-tranches');
-            if (savedTranches) {
-              setTranches(JSON.parse(savedTranches));
+            // Load and validate tranches from localStorage
+            try {
+              const savedTranches = localStorage.getItem('pck-tranches');
+              if (savedTranches) {
+                const parsed = JSON.parse(savedTranches);
+                // Validate it's an array with valid tranche objects
+                if (Array.isArray(parsed) && parsed.every(t =>
+                  t && typeof t === 'object' &&
+                  t.id && t.date && typeof t.shares === 'number' && typeof t.purchasePrice === 'number'
+                )) {
+                  setTranches(parsed);
+                } else {
+                  console.error('Invalid tranches data in localStorage, clearing...');
+                  localStorage.removeItem('pck-tranches');
+                }
+              }
+            } catch (error) {
+              console.error('Failed to load tranches from localStorage:', error);
+              localStorage.removeItem('pck-tranches');
             }
 
-            const savedAlerts = localStorage.getItem('pck-price-alerts');
-            if (savedAlerts) {
-              setPriceAlerts(JSON.parse(savedAlerts));
+            // Load and validate price alerts from localStorage
+            try {
+              const savedAlerts = localStorage.getItem('pck-price-alerts');
+              if (savedAlerts) {
+                const parsed = JSON.parse(savedAlerts);
+                // Validate it's an object with optional high/low properties
+                if (parsed && typeof parsed === 'object') {
+                  setPriceAlerts({
+                    high: parsed.high || '',
+                    low: parsed.low || ''
+                  });
+                } else {
+                  console.error('Invalid alerts data in localStorage, clearing...');
+                  localStorage.removeItem('pck-price-alerts');
+                }
+              }
+            } catch (error) {
+              console.error('Failed to load price alerts from localStorage:', error);
+              localStorage.removeItem('pck-price-alerts');
             }
           }, []);
 
           useEffect(() => {
             if (tranches.length > 0) {
-              localStorage.setItem('pck-tranches', JSON.stringify(tranches));
+              try {
+                localStorage.setItem('pck-tranches', JSON.stringify(tranches));
+              } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                  alert('Storage quota exceeded! Please export your data to CSV and consider removing old tranches.');
+                  console.error('localStorage quota exceeded:', error);
+                } else {
+                  console.error('Failed to save tranches to localStorage:', error);
+                }
+              }
             }
           }, [tranches]);
 
@@ -621,7 +662,14 @@
             );
 
             setTranches(updatedTranches);
-            localStorage.setItem('pck-tranches', JSON.stringify(updatedTranches));
+            try {
+              localStorage.setItem('pck-tranches', JSON.stringify(updatedTranches));
+            } catch (error) {
+              if (error.name === 'QuotaExceededError') {
+                alert('Storage quota exceeded! Update saved to memory but may not persist. Please export your data.');
+              }
+              console.error('Failed to save updated tranches:', error);
+            }
             setNewTranche({ date: '', shares: '', price: '' });
             setShowAddTranche(false);
             setEditingTranche(null);
@@ -640,7 +688,11 @@
             if (updatedTranches.length === 0) {
               localStorage.removeItem('pck-tranches');
             } else {
-              localStorage.setItem('pck-tranches', JSON.stringify(updatedTranches));
+              try {
+                localStorage.setItem('pck-tranches', JSON.stringify(updatedTranches));
+              } catch (error) {
+                console.error('Failed to save after delete:', error);
+              }
             }
           };
 
@@ -707,8 +759,17 @@
 
           const handleSaveAlerts = () => {
             if (priceAlerts.high || priceAlerts.low) {
-              localStorage.setItem('pck-price-alerts', JSON.stringify(priceAlerts));
-              alert('Price alerts saved! You can check them each time you visit.');
+              try {
+                localStorage.setItem('pck-price-alerts', JSON.stringify(priceAlerts));
+                alert('Price alerts saved! You can check them each time you visit.');
+              } catch (error) {
+                if (error.name === 'QuotaExceededError') {
+                  alert('Storage quota exceeded! Could not save price alerts.');
+                } else {
+                  alert('Failed to save price alerts. Please try again.');
+                }
+                console.error('Failed to save price alerts:', error);
+              }
             }
             setShowAlertSettings(false);
           };
@@ -761,7 +822,9 @@
           };
 
           const activeAlerts = checkPriceAlerts();
-          const calculatePortfolioHistory = () => {
+
+          // Memoize portfolio history calculation to avoid expensive re-renders
+          const portfolioHistory = useMemo(() => {
             if (tranches.length === 0 || chartData.length === 0) return [];
 
             // Get earliest tranche date
@@ -802,9 +865,8 @@
                 gain: portfolioValue - invested
               };
             });
-          };
+          }, [tranches, chartData]); // Recalculate only when tranches or chartData change
 
-          const portfolioHistory = calculatePortfolioHistory();
           const portfolio = calculateTotalPortfolio();
 
           // Render charts with Chart.js
