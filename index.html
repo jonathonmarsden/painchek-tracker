@@ -451,11 +451,10 @@
           const lookupHistoricalPrice = async (date) => {
             try {
               const targetDate = new Date(date);
-              const startTime = Math.floor(targetDate.getTime() / 1000) - 86400;
-              const endTime = Math.floor(targetDate.getTime() / 1000) + 86400;
+              targetDate.setHours(0, 0, 0, 0); // Normalize to midnight
+              const targetTimestamp = targetDate.getTime();
 
-              // Use CORS proxy for historical data too
-              // Use a date range approach with Netlify Function
+              // Fetch 5 years of data to ensure we have the date
               const apiUrl = `/.netlify/functions/stock-proxy?symbol=PCK.AX&range=5y`;
               const response = await fetchWithRetry(apiUrl, {
                 method: 'GET',
@@ -463,17 +462,39 @@
                   'Accept': 'application/json',
                 }
               });
-              
+
               const data = await response.json();
-              
+
               if (data.chart && data.chart.result && data.chart.result[0]) {
-                const prices = data.chart.result[0].indicators.quote[0];
-                const closePrice = prices.close.find(p => p !== null && p > 0);
-                if (closePrice) {
-                  return closePrice;
+                const result = data.chart.result[0];
+                const timestamps = result.timestamp || [];
+                const prices = result.indicators.quote[0];
+
+                // Find the price closest to the target date
+                let closestIndex = -1;
+                let closestDiff = Infinity;
+
+                timestamps.forEach((ts, index) => {
+                  const priceDate = new Date(ts * 1000);
+                  priceDate.setHours(0, 0, 0, 0); // Normalize to midnight
+                  const diff = Math.abs(priceDate.getTime() - targetTimestamp);
+
+                  // Only consider prices within 7 days of target
+                  if (diff < closestDiff && diff <= 7 * 24 * 60 * 60 * 1000) {
+                    closestDiff = diff;
+                    closestIndex = index;
+                  }
+                });
+
+                if (closestIndex >= 0 && prices.close[closestIndex] !== null) {
+                  const foundPrice = prices.close[closestIndex];
+                  const foundDate = new Date(timestamps[closestIndex] * 1000);
+                  console.log(`Historical price lookup: ${date} → ${foundDate.toLocaleDateString()} = $${foundPrice}`);
+                  return foundPrice;
                 }
               }
-              
+
+              console.warn(`No historical price found for ${date}`);
               return null;
             } catch (error) {
               console.error('Error looking up historical price:', error);
