@@ -157,6 +157,78 @@
           const isFetchingRef = useRef(false);
           const FETCH_COOLDOWN = 2000; // 2 seconds minimum between requests
 
+          // Retry logic with exponential backoff
+          const fetchWithRetry = async (url, options = {}, maxRetries = 3) => {
+            let lastError;
+            for (let i = 0; i < maxRetries; i++) {
+              try {
+                const response = await fetch(url, options);
+                if (response.ok) return response;
+
+                // Don't retry on client errors (4xx)
+                if (response.status >= 400 && response.status < 500) {
+                  throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+                }
+
+                lastError = new Error(`HTTP ${response.status}`);
+              } catch (error) {
+                lastError = error;
+              }
+
+              // Exponential backoff: wait 1s, 2s, 4s
+              if (i < maxRetries - 1) {
+                await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+              }
+            }
+            throw lastError;
+          };
+
+          // Input validation helper
+          const validateTrancheInput = (date, shares, price) => {
+            const errors = [];
+
+            // Validate date
+            if (!date) {
+              errors.push('Date is required');
+            } else {
+              const purchaseDate = new Date(date);
+              const today = new Date();
+              today.setHours(23, 59, 59, 999);
+
+              if (isNaN(purchaseDate.getTime())) {
+                errors.push('Invalid date format');
+              } else if (purchaseDate > today) {
+                errors.push('Date cannot be in the future');
+              } else if (purchaseDate.getFullYear() < 1900) {
+                errors.push('Date is too far in the past');
+              }
+            }
+
+            // Validate shares
+            const sharesNum = parseFloat(shares);
+            if (!shares || isNaN(sharesNum)) {
+              errors.push('Shares must be a valid number');
+            } else if (sharesNum <= 0) {
+              errors.push('Shares must be greater than zero');
+            } else if (sharesNum > 1000000000) {
+              errors.push('Shares value is unrealistically high');
+            }
+
+            // Validate price (if provided)
+            if (price) {
+              const priceNum = parseFloat(price);
+              if (isNaN(priceNum)) {
+                errors.push('Price must be a valid number');
+              } else if (priceNum < 0) {
+                errors.push('Price cannot be negative');
+              } else if (priceNum > 10000) {
+                errors.push('Price seems unrealistically high for PCK');
+              }
+            }
+
+            return errors;
+          }
+
           useEffect(() => {
             const savedTranches = localStorage.getItem('pck-tranches');
             if (savedTranches) {
@@ -220,22 +292,16 @@
               setLoading(true);
 
               const symbol = 'PCK.AX';
-              // Use CORS proxy to bypass CORS restrictions
-              const corsProxy = 'https://corsproxy.io/?';
-              const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=3mo`;
-              const response = await fetch(
-                corsProxy + encodeURIComponent(apiUrl),
-                {
-                  method: 'GET',
-                  headers: {
-                    'Accept': 'application/json',
-                  }
-                }
-              );
+              const range = '3mo';
+              // Use Netlify Function instead of third-party CORS proxy
+              const apiUrl = `/.netlify/functions/stock-proxy?symbol=${symbol}&range=${range}`;
 
-              if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-              }
+              const response = await fetchWithRetry(apiUrl, {
+                method: 'GET',
+                headers: {
+                  'Accept': 'application/json',
+                }
+              });
 
               const data = await response.json();
 
@@ -285,23 +351,15 @@
 
           const fetchNews = async () => {
             try {
-              // Fetch announcements from ASX
-              const corsProxy = 'https://corsproxy.io/?';
-              const asxUrl = 'https://www.asx.com.au/asx/v2/statistics/announcements.do?by=asxCode&asxCode=PCK&timeframe=D&period=M3';
+              // Fetch announcements from ASX via Netlify Function
+              const apiUrl = '/.netlify/functions/asx-proxy?code=PCK';
 
-              const response = await fetch(
-                corsProxy + encodeURIComponent(asxUrl),
-                {
-                  method: 'GET',
-                  headers: {
-                    'Accept': 'text/html',
-                  }
+              const response = await fetchWithRetry(apiUrl, {
+                method: 'GET',
+                headers: {
+                  'Accept': 'text/html',
                 }
-              );
-
-              if (!response.ok) {
-                throw new Error(`ASX API error: ${response.status}`);
-              }
+              });
 
               const html = await response.text();
               const parser = new DOMParser();
@@ -397,21 +455,14 @@
               const endTime = Math.floor(targetDate.getTime() / 1000) + 86400;
 
               // Use CORS proxy for historical data too
-              const corsProxy = 'https://corsproxy.io/?';
-              const apiUrl = `https://query1.finance.yahoo.com/v8/finance/chart/PCK.AX?period1=${startTime}&period2=${endTime}&interval=1d`;
-              const response = await fetch(
-                corsProxy + encodeURIComponent(apiUrl),
-                {
-                  method: 'GET',
-                  headers: {
-                    'Accept': 'application/json',
-                  }
+              // Use a date range approach with Netlify Function
+              const apiUrl = `/.netlify/functions/stock-proxy?symbol=PCK.AX&range=5y`;
+              const response = await fetchWithRetry(apiUrl, {
+                method: 'GET',
+                headers: {
+                  'Accept': 'application/json',
                 }
-              );
-              
-              if (!response.ok) {
-                throw new Error('Failed to fetch historical price');
-              }
+              });
               
               const data = await response.json();
               
@@ -454,27 +505,19 @@
           };
 
           const handleAddTranche = async () => {
-            if (!newTranche.date || !newTranche.shares) {
-              alert('Please enter at least a date and number of shares');
+            // Validate input using new validation helper
+            const validationErrors = validateTrancheInput(
+              newTranche.date,
+              newTranche.shares,
+              newTranche.price
+            );
+
+            if (validationErrors.length > 0) {
+              alert('Please fix the following errors:\n\n' + validationErrors.join('\n'));
               return;
             }
 
-            // Validate date is not in the future
-            const purchaseDate = new Date(newTranche.date);
-            const today = new Date();
-            today.setHours(0, 0, 0, 0); // Reset to start of day for comparison
-
-            if (purchaseDate > today) {
-              alert('Purchase date cannot be in the future. Please enter a valid past date.');
-              return;
-            }
-
-            // Validate shares is positive
             const shares = parseFloat(newTranche.shares);
-            if (shares <= 0 || isNaN(shares)) {
-              alert('Please enter a valid positive number of shares.');
-              return;
-            }
 
             // Check localStorage usage before adding
             const storageCheck = checkLocalStorageUsage();
