@@ -336,9 +336,6 @@
                       : `https://www.asx.com.au/asx/v2/statistics/${href}`;
                   }
 
-                  // Convert PDF links to HTML versions (no password required)
-                  fullUrl = fullUrl.replace('display=pdf', 'display=html');
-
                   announcements.push({
                     date: dateText,
                     title: title,
@@ -365,28 +362,28 @@
                   date: '07/10/2025',
                   title: 'Trading Halt',
                   source: 'ASX (Price Sensitive)',
-                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=html&idsId=03006183',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03006183',
                   isPriceSensitive: true
                 },
                 {
                   date: '02/10/2025',
                   title: 'Notification of cessation of securities - PCK',
                   source: 'ASX Announcement',
-                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=html&idsId=03004370',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03004370',
                   isPriceSensitive: false
                 },
                 {
                   date: '30/09/2025',
                   title: 'Appendix 3Y - Change of Director\'s Interest Notice',
                   source: 'ASX Announcement',
-                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=html&idsId=03003598',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03003598',
                   isPriceSensitive: false
                 },
                 {
                   date: '27/09/2025',
                   title: 'Update - Notification of buy-back - PCK',
                   source: 'ASX Announcement',
-                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=html&idsId=03002913',
+                  url: 'https://www.asx.com.au/asx/v2/statistics/displayAnnouncement.do?display=pdf&idsId=03002913',
                   isPriceSensitive: false
                 }
               ]);
